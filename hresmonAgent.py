@@ -264,8 +264,8 @@ def terminateAllAgents():
     try:  
        myprocesses = multiprocessing.active_children()
        for p in myprocesses: 
-          logger.info("Terminate request "+p.name())
-          t.terminate()
+          logger.info("Terminate request "+p.name)
+          p.terminate()
        msg = "Success!"   
     except Exception.message, e:
         response.status = 400
@@ -690,9 +690,11 @@ def runAgentMulti2(pollTime,uuid,metrics,pid):
                     command = commandTimestamp+";"+metrics[key]['command']
                     if "__pid__" in command:
                         command = command.replace("__pid__",pid)
-                        #print "COMMAND for METRICS",command
+                        print "COMMAND for METRICS:",command
 
                     values = subprocess.check_output(command, shell=True).rstrip()
+                    
+                    print ":::>", command 
                     values_decoded = values.decode('utf-8')
                     # This convert multiline to singleline
                     values_decoded = values_decoded.replace("\n"," ")
