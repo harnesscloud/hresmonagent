@@ -77,10 +77,10 @@ def createResourceValuesStoreMulti(uuid,metrics):
 
 def updateResourceValuesStore(nuuid,values):
     tbname = "resourceValuesStore_"+nuuid
-    #print "VALUES",values
-    #print "name",nuuid
+    print "VALUES",values
+    print "name",nuuid
     query = buildSqlInsert(len(values),tbname)
-    #print "query",query
+    print "query",query
     try:
         db = sqlite3.connect(hresmonDbName)
         cur = db.cursor()
@@ -163,6 +163,8 @@ def createAgent():
         elif instanceType == "vm":
             pidCmd = "ps -fe | grep \""+uuid+" \" | grep -v grep | awk '{print $2}'"
             pid = getPid(uuid,pidCmd)
+        elif instanceType == "generic":
+            pid = uuid
 
         if pid == "":
             msg = "No process existing for Agent "+uuid
