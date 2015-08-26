@@ -252,6 +252,37 @@ def terminateAgent():
     logger.info("Completed!")
     return jsondata
 
+
+@route('/terminateAllAgents/', method='DELETE')
+@route('/terminateAllAgents', method='DELETE')
+def terminateAllAgents():
+    logger.info("Called")
+    response.set_header('Content-Type', 'application/json')
+    response.set_header('Accept', '*/*')
+    response.set_header('Allow', 'POST, HEAD')
+    
+    try:  
+       myprocesses = multiprocessing.active_children()
+       for p in myprocesses: 
+          logger.info("Terminate request "+p.name())
+          t.terminate()
+       msg = "Success!"   
+    except Exception.message, e:
+        response.status = 400
+        error = {"message":e,"code":response.status}
+        logger.error(error)
+        return error
+    except ValueError:
+        print "Attempting to load a non-existent payload, please enter desired layout\n"
+        logger.error("Payload was empty or incorrect. A payload must be present and correct")
+    
+    result = {"Message": msg}
+    logger.info(result)
+    jsondata = json.dumps(result)
+    logger.info("Completed!")
+    return jsondata          
+              
+       
 def getProcessByName(uuid):
     try:
         myprocesses = multiprocessing.active_children()
