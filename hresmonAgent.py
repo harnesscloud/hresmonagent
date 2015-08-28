@@ -153,7 +153,7 @@ def createAgent():
         uuid = req['uuid']
         pollTime = float(req['PollTime'])
         instanceType = req['instanceType']
-
+        
         # check if the pid exists
         if instanceType == "docker":
             pidCmd = "sudo docker ps | grep \""+uuid+" \" | awk '{ print $1 }'"
@@ -857,8 +857,7 @@ Copyright 2014-2015 SAP Ltd
     if options.interface:
         INTERFACE = options.interface 
     else:
-        INTERFACE = "eth0"
-        print "No interface specified, using "+INTERFACE+" as default"
+        INTERFACE = ""
     
     if options.port:
         PORT_ADDR = options.port
