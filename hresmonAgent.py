@@ -573,6 +573,8 @@ def calculateDerived(matrix):
     return updMatrix
     
 def runAgent(pollTime,uuid,metrics,pid):
+    global CGROUP_DIR
+    
     createResourceValuesStore(uuid,metrics)
     p = multiprocessing.current_process()
     #pidCmd = "ps -fe | grep "+uuid+" | grep -v grep | awk '{print $2}'"
@@ -585,7 +587,8 @@ def runAgent(pollTime,uuid,metrics,pid):
     command = buildCommand(metrics)+commandTimestamp
     if "__pid__" in command:
         command = command.replace("__pid__",pid)
-    
+    if ("__cgroup__" in command) and (CGROUP_DIR != ""):
+       command = command.replace("__cgroup__", CGROUP_DIR)
     #print "New command", command
 
     while True:
@@ -612,6 +615,8 @@ def runAgent(pollTime,uuid,metrics,pid):
 
 
 def runAgentMulti(pollTime,uuid,metrics,pid):
+    global CGROUP_DIR
+    
     createResourceValuesStoreMulti(uuid,metrics)
     p = multiprocessing.current_process()
     msg = 'Starting '+p.name+ " to monitor "+pid
@@ -639,6 +644,8 @@ def runAgentMulti(pollTime,uuid,metrics,pid):
                 command = commandTimestamp+";"+metrics[i]['command']
                 if "__pid__" in command:
                     command = command.replace("__pid__",pid)
+                if ("__cgroup__" in command) and (CGROUP_DIR != ""):
+                    command = command.replace("__cgroup__", CGROUP_DIR)    
 
                 #print "COMMAND for METRICS",command
 
@@ -666,6 +673,7 @@ def runAgentMulti(pollTime,uuid,metrics,pid):
         time.sleep(pollTime)
 
 def runAgentMulti2(pollTime,uuid,metrics,pid):
+    global CGROUP_DIR
     logger.info("Called")
     createResourceValuesStoreMulti(uuid,metrics)
     p = multiprocessing.current_process()
@@ -690,7 +698,8 @@ def runAgentMulti2(pollTime,uuid,metrics,pid):
                     command = commandTimestamp+";"+metrics[key]['command']
                     if "__pid__" in command:
                         command = command.replace("__pid__",pid)
-                        print "COMMAND for METRICS:",command
+                    if ("__cgroup__" in command) and (CGROUP_DIR != ""):
+                       command = command.replace("__cgroup__", CGROUP_DIR)    
 
                     values = subprocess.check_output(command, shell=True).rstrip()
                     
@@ -720,6 +729,7 @@ def runAgentMulti2(pollTime,uuid,metrics,pid):
 
 def runAgentC(pollTime,uuid,metrics):
     #createResourceValuesStore(uuid,metrics)
+    global CGROUP_DIR
     p = multiprocessing.current_process()
     pidCmd = "sudo docker ps | grep "+uuid+" | awk '{ print $1 }'"
     pid = getPid(uuid,pidCmd)
@@ -731,6 +741,8 @@ def runAgentC(pollTime,uuid,metrics):
     command = buildCommand(metrics)
     if "__pid__" in command:
         command = command.replace("__pid__",pid)
+    if ("__cgroup__" in command) and (CGROUP_DIR != ""):
+        command = command.replace("__cgroup__", CGROUP_DIR)    
     
     print "New command", command
     
@@ -866,8 +878,17 @@ Copyright 2014-2015 SAP Ltd
     else:
         PORT_ADDR = 12000
         print "No port specified, using "+str(PORT_ADDR)+" as default"
-
+    
+    global CGROUP_DIR
+    if os.path.isdir("/sys/fs/cgroup"):
+       CGROUP_DIR = "/sys/fs/cgroup"
+    elif os.path.isdir("/cgroup"):
+       CGROUP_DIR = "/cgroup"
+    else:
+       CGROUP_DIR = ""    
+    
     try:
+       print "cgroup dir = ", CGROUP_DIR
        init(INTERFACE)
        print "Initialization done"
        startAPI(IP_ADDR,PORT_ADDR)
